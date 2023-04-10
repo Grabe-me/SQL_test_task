@@ -4,20 +4,17 @@
 (имя фамилия адрес клиента, сумма заказанных товаров)
 
 
-SELECT o.order_number, c.name, c.surname, o.fk_model
-FROM clients c JOIN orders o ON c.client=o.fk_client
-ORDER BY o.order_number;
+SELECT c.name, c.surname, COUNT(o.order_number) AS count_orders FROM
+clients c JOIN orders o ON c.client = o.fk_client
+GROUP BY c.client
+ORDER BY count_orders, c.client;
 
 
-| order_number  |     name     |     surname    |    fk_model     |
-+---------------+--------------+----------------+-----------------+
-|       1       |    "Олег"    |    "Титов"     |    "Honor"      |
-|       2       |    "Олег"    |    "Титов"     |    "Samsung"    |
-|       3       |    "Иван"    |    "Иванов"    |    "Xerox"      |
-|       4       |    "Андрей"  |    "Иванов"    |    "Xerox"      |
-|       5       |    "Сергей"  |    "Кривов"    |    "Toshiba"    |
-|       6       |    "Андрей"  |    "Иванов"    |    "Bosch"      |
-|       7       |    "Олег"    |    "Титов"     |    "Bosch"      |
-|       8       |    "Сергей"  |    "Кривов"    |    "Sony"       |
+| name     | surname   | count_orders |
++----------+-----------+--------------+
+| "Иван"   | "Иванов"  |      1       |
+| "Андрей" | "Иванов"  |      2       |
+| "Сергей" | "Кривов"  |      2       |
+| "Олег"   | "Титов"   |      3       |
 
 
