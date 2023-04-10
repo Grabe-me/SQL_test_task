@@ -1,0 +1,31 @@
+CREATE OR REPLACE FUNCTION update_category_quantity()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE categories
+  SET quantity = (SELECT COUNT(*) FROM products WHERE fk_category = NEW.fk_category)
+  WHERE category = NEW.fk_category;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_category_quantity_trigger
+AFTER INSERT OR UPDATE OR DELETE ON products
+FOR EACH ROW
+EXECUTE FUNCTION update_category_quantity();
+
+
+
+CREATE OR REPLACE FUNCTION update_product_quantity()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE products
+  SET quantity = (SELECT COUNT(*) FROM models WHERE fk_product = NEW.fk_product)
+  WHERE product = NEW.fk_product;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_product_quantity_trigger
+AFTER INSERT OR UPDATE OR DELETE ON models
+FOR EACH ROW
+EXECUTE FUNCTION update_product_quantity();
