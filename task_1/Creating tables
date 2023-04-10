@@ -1,0 +1,32 @@
+CREATE TABLE IF NOT EXISTS categories (
+    category VARCHAR(50) PRIMARY KEY,
+    quantity INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS products (
+    product VARCHAR(50) PRIMARY KEY,
+    quantity INTEGER,
+    fk_category VARCHAR(50) REFERENCES categories(category)
+);
+
+CREATE TABLE IF NOT EXISTS models (
+    model VARCHAR(50) PRIMARY KEY,
+    quantity INTEGER,
+    fk_product VARCHAR(50) REFERENCES products(product)
+);
+
+CREATE TABLE IF NOT EXISTS clients (
+    client SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    surname VARCHAR(50) NOT NULL,
+    address text NOT NULL
+);
+
+CREATE UNIQUE INDEX idx_unique_client
+ON clients (name, surname, address);
+
+CREATE TABLE IF NOT EXISTS orders (
+    fk_client INTEGER REFERENCES clients(client),
+    fk_model VARCHAR(50) REFERENCES models(model),
+    order_number SERIAL NOT NULL UNIQUE
+);
