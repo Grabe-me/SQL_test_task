@@ -22,20 +22,27 @@
 Для получения аналогичного результата необходимо составить функцию с использованием циклов:
 
 CREATE OR REPLACE FUNCTION count_products_by_category()
-RETURNS TABLE (category_name TEXT, product_name TEXT, count_value BIGINT) AS $$
+RETURNS TABLE (category_name TEXT, product_name TEXT, model_name TEXT, count_value INTEGER) AS $$
 BEGIN
     FOR category_name IN SELECT c.category FROM categories c LOOP
-        RETURN QUERY SELECT category_name, null, COUNT(p.*) FROM
-		products p WHERE p.fk_category = category_name;
-
-        FOR product_name IN SELECT p.product FROM
+        RETURN QUERY SELECT category_name, null, null, c.quantity FROM 
+		categories c WHERE c.category = category_name;
+        
+        FOR product_name IN SELECT p.product FROM 
 		products p WHERE p.fk_category = category_name LOOP
-            RETURN QUERY SELECT null, product_name, COUNT(m.*) FROM
-			models m JOIN products p ON m.fk_product = p.product WHERE p.product = product_name;
+            RETURN QUERY SELECT null, product_name, null, p.quantity FROM
+			products p WHERE p.product = product_name;
+			
+            FOR model_name IN SELECT m.model FROM 
+	        	models m WHERE m.fk_product = product_name LOOP
+            	RETURN QUERY SELECT null, null, model_name, m.quantity FROM
+				models m WHERE m.model = model_name;
+            END LOOP;
         END LOOP;
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 
@@ -44,16 +51,32 @@ SQL запррос для вызова данной функции:
 SELECT * FROM count_products_by_category();
 
 
-|   category_name   |  product_name  | count_value |
-+-------------------+----------------+-------------+
-| "Бытовая техника" |                |      3      |
-|                   | "Холодильники" |      2      |
-|                   | "Пылесосы"     |      3      |
-|                   | "Утюги"        |      1      |
-| "Компьютеры"      |                |      2      |
-|                   | "Ноутбуки"     |      4      |
-|                   | "Моноблоки"    |      1      |
-| "Телефоны"        |                |      3      |
-|                   | "Мобильные"    |      3      |
-|                   | "Стационарные" |      1      |
-|                   | "Факсы"        |      1      |
+|   category_name   |  product_name  |  model_name  | count_value |
++-------------------+----------------+--------------+-------------|
+| "Бытовая техника" |                |              |       3     |
+|                   | "Холодильники" |              |       2     |
+|                   |                | "Indesit"    |       2     |
+|                   |                | "Beko"       |       1     |
+|                   | "Пылесосы"     |              |       3     |
+|                   |                | "Haier"      |       3     |
+|                   |                | "Bosch"      |       5     |
+|                   |                | "Vestel"     |       2     |
+|                   | "Утюги"        |              |       1     |
+|                   |                |"Tefal"       |       4     |
+| "Компьютеры"      |                |              |       2     |
+|                   | "Ноутбуки"     |              |       4     |
+|                   |                | "Sony"       |       3     |
+|                   |                | "Lenovo"     |       5     |
+|                   |                | "Samsung"    |       2     |
+|                   |                | "Apple"      |       6     |
+|                   | "Моноблоки"    |              |       1     |
+|                   |                | "Toshiba"    |       5     |
+| "Телефоны"        |                |              |       3     |
+|                   | "Мобильные"    |              |       3     |
+|                   |                |"Honor"	    |       3     |
+|                   |                |"Xiaomy"	    |       1     |
+|                   |                |"Meizu"	    |       6     |
+|                   | "Стационарные" |              |       1     |
+|                   |                |"Philips"	    |       9     |
+|                   | "Факсы"        |              |       1     |
+|                   |                |"Xerox"	    |       7     |
