@@ -1,0 +1,59 @@
+
+
+Задание 2.2. Найти количество дочерних элементов первого уровня вложенности для категорий номенклатуры.
+
+
+Пример:
+
+Бытовая техника                                 3                                                
+                Стиральные машины               0              
+                Холодильники                    2                    
+                                  однокамерные  0                           
+                                  двухкамерные  0                          
+                Телевизоры                      0                      
+Компьютеры                                      2
+                Ноутбуки                        2
+                                  17“           0
+                                  19“           0
+                Моноблоки                       0
+
+----------------------------------------------------------------------------------------------------------------------
+
+Для получения аналогичного результата необходимо составить функцию с использованием циклов:
+
+CREATE OR REPLACE FUNCTION count_products_by_category()
+RETURNS TABLE (category_name TEXT, product_name TEXT, count_value BIGINT) AS $$
+BEGIN
+    FOR category_name IN SELECT c.category FROM categories c LOOP
+        RETURN QUERY SELECT category_name, null, COUNT(p.*) FROM
+		products p WHERE p.fk_category = category_name;
+
+        FOR product_name IN SELECT p.product FROM
+		products p WHERE p.fk_category = category_name LOOP
+            RETURN QUERY SELECT null, product_name, COUNT(m.*) FROM
+			models m JOIN products p ON m.fk_product = p.product WHERE p.product = product_name;
+        END LOOP;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+SQL запррос для вызова данной функции:
+
+SELECT * FROM count_products_by_category();
+
+
+|   category_name   |  product_name  | count_value |
++-------------------+----------------+-------------+
+| "Бытовая техника" |                |      3      |
+|                   | "Холодильники" |      2      |
+|                   | "Пылесосы"     |      3      |
+|                   | "Утюги"        |      1      |
+| "Компьютеры"      |                |      2      |
+|                   | "Ноутбуки"     |      4      |
+|                   | "Моноблоки"    |      1      |
+| "Телефоны"        |                |      3      |
+|                   | "Мобильные"    |      3      |
+|                   | "Стационарные" |      1      |
+|                   | "Факсы"        |      1      |
